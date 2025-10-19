@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { email, z } from "zod";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
 
 const registerSchema = z
   .object({
@@ -51,7 +52,22 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
-    console.log(values);
+    await authClient.signUp.email(
+      {
+        name: values.email,
+        email: values.email,
+        password: values.password,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          router.push("/");
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+      }
+    );
   };
   const isPending = form.formState.isSubmitting;
   return (
